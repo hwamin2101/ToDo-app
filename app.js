@@ -1,12 +1,17 @@
-const express = require('express');
-const app = express();
-const authRoutes = require('./routes/auth.routes.js');
 require('dotenv').config();
-
+const express = require('express');
+const sequelize = require('./config/database');
+const userRoutes = require('./routes/userRoutes');
+const app = express();
 app.use(express.json());
-app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 
-
-app.listen(3000, () => {
-  console.log('Server running on http://localhost:3000');
+const PORT = process.env.PORT || 3000;
+sequelize.sync().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}).catch((error) => {
+  console.error('Unable to connect to MySQL:', error);
+  process.exit(1);
 });
