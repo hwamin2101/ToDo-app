@@ -2,6 +2,7 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const User = require("../models/UserModel");
 const userService = require('../service/userService');
+const authService = require('../service/authService');
 
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
@@ -14,15 +15,9 @@ const signup = async (req, res) => {
       password:password.trim(),
       dateOfBirth:dateOfBirth.trim()
     }
-    const result = await userService.signup(trimmeData);
-    if(result.status=="error"){
-      console.log("result error ___",result)
-      return res.json({message:result.message})
-    }
-      console.log("result ___",result)
-
+    const result = await authService.signup(trimmeData); 
     res.json({
-      status: "success",
+      status: result.status,
       message: result.message,
       data: result.data,
     })
@@ -31,6 +26,7 @@ const signup = async (req, res) => {
     res.json({message:"an error occurred"})
   }
 }
+
 const login= async (req, res) => {
   try{
     const{email,password}= req.body;
@@ -38,7 +34,7 @@ const login= async (req, res) => {
       email:email.trim(),
       password:password.trim()
     }
-    const result = await userService.login(trimmeData);
+    const result = await authService.login(trimmeData); 
     if(result.status=="error"){
       return res.json({message:result.message})
     }
@@ -83,10 +79,14 @@ const refreshToken = async (req, res) => {
   }
 }
 const getAllUsers = async (req, res) => {
-  const result = await userService.getAllUsers();
-  return{
-    status: "success",
-    data: result,
+  try {
+    const users = await userService.getAllUsers();
+    res.json({
+      status: "success",
+      data: users,
+    });
+  } catch (error) {
+    res.status(500).json({ status: "error", message: error.message });
   }
 }
 module.exports = {
