@@ -7,47 +7,46 @@ const authService = require('../service/authService');
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
 const signup = async (req, res) => {
-  try{
-    const {name,email,password,dateOfBirth} = req.body;
-    const trimmeData={
-      name:name.trim(),
-      email:email.trim(),
-      password:password.trim(),
-      dateOfBirth:dateOfBirth.trim()
+    try {
+        const { name, email, password, dateOfBirth } = req.body;
+        const trimmeData = {
+            name: name.trim(),
+            email: email.trim(),
+            password: password.trim(),
+            dateOfBirth: dateOfBirth.trim()
+        };
+        const result = await authService.signup(trimmeData);
+        console.log("result ====>", result);
+       if (result.status !== 200) {
+            return res.status(result.status).json({ message: result.message });
+       }
+        res.status(200).json(result);
+    } catch (error) {
+        const status = error.status || 500;
+        const message = error.message || "An error occurred during signup";
+        res.status(status).json({ message });
     }
-    const result = await authService.signup(trimmeData); 
-    res.json({
-      status: result.status,
-      message: result.message,
-      data: result.data,
-    })
-  }catch(error){
-    console.log("error during signup",error)
-    res.json({message:"an error occurred"})
-  }
-}
+};
 
-const login= async (req, res) => {
-  try{
-    const{email,password}= req.body;
-    const trimmeData={
-      email:email.trim(),
-      password:password.trim()
+const login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const trimmeData = {
+            email: email.trim(),
+            password: password.trim()
+        };
+        const result = await authService.login(trimmeData);
+        ("result ====>", result);
+        if (result.status !== 200) {
+          return res.status(result.status).json({ message: result.message });
+        }
+        res.status(200).json(result); 
+    } catch (error) {
+        const status = error.status || 500;
+        const message = error.message || "An error occurred during login";
+        res.status(status).json({ message });
     }
-    const result = await authService.login(trimmeData); 
-    if(result.status=="error"){
-      return res.json({message:result.message})
-    }
-    res.json({
-      status: "success",
-      message: result.message,
-      data: result.data,
-    })
-  }catch(error){
-    console.log("error during login",error)
-    res.json({message:"an error occurred"})
-  }
-}
+};
 
 const refreshToken = async (req, res) => {
   const {token} = req.body;
