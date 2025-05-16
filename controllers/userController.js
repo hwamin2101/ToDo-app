@@ -16,7 +16,7 @@ const signup = async (req, res) => {
             dateOfBirth: dateOfBirth.trim()
         };
         const result = await authService.signup(trimmeData);
-        console.log("result ====>", result);
+        
        if (result.status !== 200) {
             return res.status(result.status).json({ message: result.message });
        }
@@ -36,7 +36,7 @@ const login = async (req, res) => {
             password: password.trim()
         };
         const result = await authService.login(trimmeData);
-        ("result ====>", result);
+        
         if (result.status !== 200) {
           return res.status(result.status).json({ message: result.message });
         }
