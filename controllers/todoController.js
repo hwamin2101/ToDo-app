@@ -9,11 +9,11 @@ const getAllTodo = async (req, res) => {
         res.status(status).json({ message });
     }
 };
-const getTodo = async (req, res) => {
+const getTodoByPage = async (req, res) => {
     try{
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-        const result = await todoService.getTodo(page, limit);
+        const result = await todoService.getTodoByPage(page, limit);
         res.status(200).json(result);
     }catch (error) {
         const status = error.status || 500;
@@ -50,7 +50,7 @@ const deleteTodo = async (req, res) => {
 
 module.exports = {
     getAllTodo,
-    getTodo,
+    getTodoByPage,
     createTodo,
     updateTodo,
     deleteTodo

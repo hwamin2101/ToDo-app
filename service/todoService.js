@@ -4,7 +4,7 @@ const getAllTodo = async () => {
     return await Todo.findAll();
 };
 
-const getTodo = async (page = 1, limit = 10) => {
+const getTodoByPage = async (page = 1, limit = 10) => {
     const offset = (page - 1) * limit;
     return await Todo.findAndCountAll({offset, limit});
 };
@@ -30,7 +30,7 @@ const deleteTodo = async (id) => {
 };
 module.exports = {
     getAllTodo,
-    getTodo,
+    getTodoByPage,
     createTodo,
     updateTodo,
     deleteTodo
