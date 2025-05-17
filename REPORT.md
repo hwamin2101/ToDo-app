@@ -1,6 +1,4 @@
-Dưới đây là phiên bản được **định dạng lại bằng Markdown** phù hợp để bạn dùng trong file `Report.md`, đọc tốt trên cả **VS Code** lẫn **GitHub**:
 
----
 
 
 # 📘 Body, Params, Query trong API
