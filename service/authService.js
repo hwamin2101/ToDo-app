@@ -15,112 +15,78 @@ const generateRefreshToken = (user) => {
 }
 
 const signup = async ({ name, email, password, dateOfBirth }) => {
-    try {
-        if (!name || !email || !password) {
-            return { status: "error", message: "Empty required information" }
-        }
-        if (!/^[a-zA-Z]*$/.test(name)) {
-            return { status: "error", message: "Invalid name entered" }
-        }
-        if (!/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[\w-]{2,7}$/.test(email)) {
-            return { status: "error", message: "Invalid email entered" }
-        }
-        if (!new Date(dateOfBirth).getTime()) {
-            return { status: "error", message: "Invalid date of birth entered" }
-        }
-        if (password.length < 6) {
-            return {
-                status: "error",
-                message: "Password must be at least 6 characters",
-            }
-        }
-
-        const existingUser = await User.findOne({ email })
-        if (existingUser) {
-            return {
-                status: "error",
-                message: "User with the given email already exists!",
-            }
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10)
-
-        const newUser = new User({
-            name,
-            email,
-            password: hashedPassword,
-            dateOfBirth,
-        })
-
-        const savedUser = await newUser.save()
-
-        return {
-            status: "success",
-            message: "Save new user successfully",
-            data: savedUser,
-        }
-    } catch (error) {
-        console.error("Error in auth service:", error)
-        return {
-            status: "error",
-            message: "An error occurred during signup",
-        }
+    if (!name || !email || !password) {
+        return { status: 400, message: "Empty required information" };
     }
+    if (!/^[a-zA-Z]*$/.test(name)) {
+        return { status: 400, message: "Invalid name entered" };
+    }
+    if (!/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[\w-]{2,7}$/.test(email)) {
+        return { status: 400, message: "Invalid email entered" };
+    }
+    if (!new Date(dateOfBirth).getTime()) {
+        return { status: 400, message: "Invalid date of birth entered" };
+    }
+    if (password.length < 6) {
+        return { status: 400, message: "Password must be at least 6 characters" };
+    }
+
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+        return { status: 409, message: "User with the given email already exists!" };
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await User.create({
+        name,
+        email,
+        password: hashedPassword,
+        dateOfBirth,
+    });
+
+    return {
+        message: "Save new user successfully",
+        data: newUser,
+        status: 200
+    };
 }
 
 const login = async ({ email, password }) => {
-    try {
-        if (!email || !password) {
-            return {
-                status: "error",
-                message: "Email or password is missing",
-            }
-        }
-        if (!/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[\w-]{2,7}$/.test(email)) {
-            return {
-                status: "error",
-                message: "Invalid email entered",
-            }
-        }
-
-        const user = await User.findOne({ email })
-        if (!user) {
-            return {
-                status: "error",
-                message: "User not found",
-            }
-        }
-
-
-        const passwordMatch = await bcrypt.compare(password, user.password)
-        if (!passwordMatch) {
-            return {
-                status: "error",
-                message: "Incorrect password",
-            }
-        }
-
-        const accessToken = generateAccessToken({
-            id: user._id,
-            email: user.email,
-        })
-        const refreshToken = generateRefreshToken({
-            id: user._id,
-            email: user.email,
-        })
-
-        return {
-            status: "success",
-            message: "User logged in successfully",
-            data: { user, accessToken, refreshToken },
-        }
-    } catch (error) {
-        console.error("Error in auth service:", error)
-        return {
-            status: "error",
-            message: "An error occurred during login",
-        }
+    if (!email || !password) {
+        return { status: 400, message: "Email or password is missing" };
     }
+    if (!/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[\w-]{2,7}$/.test(email)) {
+        return { status: 400, message: "Invalid email entered" };
+    }
+
+    
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+        return { status: 404, message: "User not found" };
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+        return { status: 401, message: "Incorrect password" };
+    }
+
+    const accessToken = generateAccessToken({
+        id: user.id,
+        email: user.email,
+    });
+    const refreshToken = generateRefreshToken({
+        id: user.id,
+        email: user.email,
+    });
+
+    return {
+        message: "User logged in successfully",
+        data: { user, accessToken, refreshToken },
+        status:200
+       
+    };
+       
 }
 
 module.exports = {
